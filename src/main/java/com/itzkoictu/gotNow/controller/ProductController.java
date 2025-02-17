@@ -124,5 +124,17 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/distinct/products")
+    public ResponseEntity<ApiResponse> getDistinctProductByName(){
+        List<Product> products1= productService.findDistinctProductByName();
+        List<ProductResponse> products= productService.getConvertedProducts(products1);
+        return ResponseEntity.ok().body(new ApiResponse(HttpStatus.OK.value(), "All product distinct", products));
+    }
+
+
+    @GetMapping("/distinct/brands")
+    public ResponseEntity<ApiResponse> getDistinctBrand(){
+        return ResponseEntity.ok().body(new ApiResponse(HttpStatus.OK.value(), "All brands distinct", productService.getAllDistinctBrand()));
+    }
 
 }

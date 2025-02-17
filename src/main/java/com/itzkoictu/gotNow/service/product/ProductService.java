@@ -15,8 +15,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -158,5 +161,26 @@ public class ProductService {
         List<ImageResponse> imageResponses= images.stream().map(image -> mapper.map(image, ImageResponse.class)).toList();
         productResponse.setImages(imageResponses);
         return productResponse;
+    }
+
+    public List<Product> findDistinctProductByName(){
+        List<Product> products= getAllProducts();
+        Map<String, Product> distinctProductMap= products.stream()
+                .collect(Collectors.toMap(Product::getName, product -> product,
+                        (existing, replacement) -> existing
+                        ));
+        return  new ArrayList<>(distinctProductMap.values());
+    }
+
+
+
+
+    public List<String> getAllDistinctBrand(){
+        return productRepository.findAll()
+                .stream()
+                .map(Product :: getBrand)
+                .distinct()
+                .toList();
+
     }
 }
