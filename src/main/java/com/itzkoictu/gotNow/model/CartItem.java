@@ -1,5 +1,6 @@
 package com.itzkoictu.gotNow.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

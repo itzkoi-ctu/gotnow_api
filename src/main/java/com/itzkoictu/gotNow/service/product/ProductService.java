@@ -26,17 +26,17 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 
 public class ProductService {
-     ProductRepository productRepository;
-     CategoryRepository categoryRepository;
+    ProductRepository productRepository;
+    CategoryRepository categoryRepository;
 
-     CartItemRepository cartItemRepository;
-     OrderItemRepository orderItemRepository;
-     ModelMapper mapper;
-     ImageRepository imageRepository;
+    CartItemRepository cartItemRepository;
+    OrderItemRepository orderItemRepository;
+    ModelMapper mapper;
+    ImageRepository imageRepository;
 
     public Product addProduct(AddProductRequest request) {
-        System.out.println(" request+ "+request);
-        if(productExist(request.getName(),request.getBrand())){
+        System.out.println(" request+ " + request);
+        if (productExist(request.getName(), request.getBrand())) {
             throw new EntityExistsException(request.getName() + " already exists");
         }
 //        Category category= Optional.ofNullable(request.getCategory())
@@ -49,9 +49,9 @@ public class ProductService {
 //
 //                                    return null;
 //                                });
-        Category category= Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
                 .orElseGet(() -> {
-                    Category newCategory= new Category(request.getCategory().getName());
+                    Category newCategory = new Category(request.getCategory().getName());
                     return categoryRepository.save(newCategory);
 
                 });
@@ -60,10 +60,11 @@ public class ProductService {
 
     }
 
-    private boolean productExist(String name, String brand){
+    private boolean productExist(String name, String brand) {
         return productRepository.existsByNameAndBrand(name, brand);
     }
-    private Product createProduct(AddProductRequest request, Category category){
+
+    private Product createProduct(AddProductRequest request, Category category) {
         return new Product(
                 request.getName(),
                 request.getBrand(),
@@ -77,16 +78,17 @@ public class ProductService {
 
     public Product updateProduct(ProductUpdateRequest product, Long productId) {
         return productRepository.findById(productId)
-                .map(existingProduct -> updateExistingProduct(existingProduct, product ))
-                .map(productRepository :: save).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                .map(existingProduct -> updateExistingProduct(existingProduct, product))
+                .map(productRepository::save).orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
     }
-    private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest productUpdateRequest){
+
+    private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest productUpdateRequest) {
         existingProduct.setName(productUpdateRequest.getName());
         existingProduct.setBrand(productUpdateRequest.getBrand());
         existingProduct.setPrice(productUpdateRequest.getPrice());
         existingProduct.setInventory(productUpdateRequest.getInventory());
-        Category category= categoryRepository.findByName(productUpdateRequest.getCategory().getName());
+        Category category = categoryRepository.findByName(productUpdateRequest.getCategory().getName());
         existingProduct.setCategory(category);
         existingProduct.setName(productUpdateRequest.getName());
         return existingProduct;
@@ -94,20 +96,20 @@ public class ProductService {
     }
 
     public Product getProductById(Long productId) {
-        return productRepository.findById(productId).orElseThrow(()->new EntityNotFoundException("Product not found"));
+        return productRepository.findById(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
     public void deleteProductById(Long productId) {
         productRepository.findById(productId)
                 .ifPresentOrElse(product -> {
-                    List<CartItem> cartItems= cartItemRepository.findByProductId(productId);
+                    List<CartItem> cartItems = cartItemRepository.findByProductId(productId);
                     cartItems.forEach(cartItem -> {
-                        Cart cart= cartItem.getCart();
+                        Cart cart = cartItem.getCart();
                         cart.removeItem(cartItem);
                         cartItemRepository.delete(cartItem);
                     });
 
-                    List<OrderItem> orderItems= orderItemRepository.findProductById(productId);
+                    List<OrderItem> orderItems = orderItemRepository.findProductById(productId);
                     orderItems.forEach(orderItem -> {
                         orderItem.setProduct(null);
                         orderItemRepository.save(orderItem);
@@ -115,12 +117,12 @@ public class ProductService {
 
                     Optional.ofNullable(product.getCategory())
                             .ifPresent(category -> category.getProducts().remove(product));
-                            product.setCategory(null);
-                            productRepository.deleteById(productId);
+                    product.setCategory(null);
+                    productRepository.deleteById(productId);
 
-                            }, ()->{ throw new EntityNotFoundException("product not found");
+                }, () -> {
+                    throw new EntityNotFoundException("product not found");
                 });
-
 
 
     }
@@ -130,13 +132,17 @@ public class ProductService {
     }
 
     public List<Product> getProductsByCategoryAndBrand(String category, String brand) {
-        Category category1= categoryRepository.findByName(category);
+        Category category1 = categoryRepository.findByName(category);
         return productRepository.findByCategoryAndBrand(category1, brand);
     }
 
     public List<Product> getProductsByCategory(String category) {
-        Category category1= categoryRepository.findByName(category);
+        Category category1 = categoryRepository.findByName(category);
         return productRepository.findByCategory(category1);
+    }
+
+    public List<Product> getProductsByCategoryId(Long categoryId) {
+        return productRepository.findAllByCategoryId(categoryId);
     }
 
     public List<Product> getProductsByBrandAndName(String brand, String name) {
@@ -151,34 +157,32 @@ public class ProductService {
         return productRepository.findByName(name);
     }
 
-    public List<ProductResponse> getConvertedProducts(List<Product> products){
+    public List<ProductResponse> getConvertedProducts(List<Product> products) {
         return products.stream().map(this::convertToProductResponse).toList();
     }
 
-    public ProductResponse convertToProductResponse(Product product){
-        ProductResponse productResponse= mapper.map(product, ProductResponse.class);
-        List<Image> images= imageRepository.findByProductId(product.getId());
-        List<ImageResponse> imageResponses= images.stream().map(image -> mapper.map(image, ImageResponse.class)).toList();
+    public ProductResponse convertToProductResponse(Product product) {
+        ProductResponse productResponse = mapper.map(product, ProductResponse.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageResponse> imageResponses = images.stream().map(image -> mapper.map(image, ImageResponse.class)).toList();
         productResponse.setImages(imageResponses);
         return productResponse;
     }
 
-    public List<Product> findDistinctProductByName(){
-        List<Product> products= getAllProducts();
-        Map<String, Product> distinctProductMap= products.stream()
+    public List<Product> findDistinctProductByName() {
+        List<Product> products = getAllProducts();
+        Map<String, Product> distinctProductMap = products.stream()
                 .collect(Collectors.toMap(Product::getName, product -> product,
                         (existing, replacement) -> existing
-                        ));
-        return  new ArrayList<>(distinctProductMap.values());
+                ));
+        return new ArrayList<>(distinctProductMap.values());
     }
 
 
-
-
-    public List<String> getAllDistinctBrand(){
+    public List<String> getAllDistinctBrand() {
         return productRepository.findAll()
                 .stream()
-                .map(Product :: getBrand)
+                .map(Product::getBrand)
                 .distinct()
                 .toList();
 

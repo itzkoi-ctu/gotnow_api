@@ -1,6 +1,7 @@
 package com.itzkoictu.gotNow.controller;
 
 import com.itzkoictu.gotNow.dto.response.ApiResponse;
+import com.itzkoictu.gotNow.dto.response.CartResponse;
 import com.itzkoictu.gotNow.model.Cart;
 import com.itzkoictu.gotNow.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,8 @@ public class CartController {
     @GetMapping("/user/{userId}/cart")
     public ResponseEntity<ApiResponse> getUserCart(@PathVariable Long userId){
         Cart cart= cartService.getCartByUserId(userId);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", cart));
+        CartResponse cartResponse= cartService.convertToCartResponse(cart);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", cartResponse));
     }
     @DeleteMapping("/cart/{cartId}/clear")
     public ResponseEntity<ApiResponse> clearCart(@PathVariable Long cartId){
