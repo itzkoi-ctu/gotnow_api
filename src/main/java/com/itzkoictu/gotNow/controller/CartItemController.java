@@ -1,7 +1,9 @@
 package com.itzkoictu.gotNow.controller;
 
 import com.itzkoictu.gotNow.dto.response.ApiResponse;
+import com.itzkoictu.gotNow.dto.response.CartItemResponse;
 import com.itzkoictu.gotNow.model.Cart;
+import com.itzkoictu.gotNow.model.CartItem;
 import com.itzkoictu.gotNow.model.User;
 import com.itzkoictu.gotNow.service.cart.CartItemService;
 import com.itzkoictu.gotNow.service.cart.CartService;
@@ -22,25 +24,26 @@ public class CartItemController {
 
     @PostMapping("/item/add")
     public ResponseEntity<ApiResponse> addItemToCart(@RequestParam Long productId,
-                                                     @RequestParam int quantity){
-//            User user= userService.getAuthenticatedUser();
-//            Cart cart= cartService.initializeNewCartForUser(user);
-            cartItemService.addItemToCart(1L, productId, quantity);
-
-            return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Item added successfully", null));
+                                                     @RequestParam int quantity) {
+        //User user= userService.getAuthenticatedUser();
+        //Cart cart= cartService.initializeNewCartForUser(user);
+        CartItem cartItem = cartItemService.addItemToCart(2L, productId, quantity);
+        CartItemResponse response = cartItemService.convertToResponse(cartItem);
+        return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Item added successfully", response));
     }
+
     @DeleteMapping("/cart/{cartId}/item/{itemId}/remove")
-    public ResponseEntity<ApiResponse> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId){
-        cartItemService.removeItemFromCart(cartId,itemId);
-        return ResponseEntity.ok(new ApiResponse(HttpStatus.OK.value(),"Item remove successfully", null));
+    public ResponseEntity<ApiResponse> removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
+        cartItemService.removeItemFromCart(cartId, itemId);
+        return ResponseEntity.ok(new ApiResponse(HttpStatus.OK.value(), "Item remove successfully", null));
     }
 
     @PutMapping("/cart/{cartId}/item/{itemId}/update")
     public ResponseEntity<ApiResponse> updateCartItem(
             @PathVariable Long cartId,
             @PathVariable Long itemId,
-            @RequestParam int quantity){
-        cartItemService.updateItemQuantity(cartId,itemId,quantity);
+            @RequestParam int quantity) {
+        cartItemService.updateItemQuantity(cartId, itemId, quantity);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Item updated successfullt"));
 
     }

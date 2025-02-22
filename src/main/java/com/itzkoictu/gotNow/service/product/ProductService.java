@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,16 +41,7 @@ public class ProductService {
         if (productExist(request.getName(), request.getBrand())) {
             throw new EntityExistsException(request.getName() + " already exists");
         }
-//        Category category= Optional.ofNullable(request.getCategory())
-//                        .map(category1 -> categoryRepository.findByName(category1.getName()))
-//                                .orElseGet(() -> {
-//                                    if(request.getCategory() != null && request.getCategory().getName() != null){
-//                                        Category newCate= new Category(request.getCategory().getName());
-//                                        categoryRepository.save(newCate);
-//                                    }
-//
-//                                    return null;
-//                                });
+
         Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
                 .orElseGet(() -> {
                     Category newCategory = new Category(request.getCategory().getName());
@@ -77,6 +70,7 @@ public class ProductService {
     }
 
     public Product updateProduct(ProductUpdateRequest product, Long productId) {
+
         return productRepository.findById(productId)
                 .map(existingProduct -> updateExistingProduct(existingProduct, product))
                 .map(productRepository::save).orElseThrow(() -> new EntityNotFoundException("Product not found"));
@@ -88,9 +82,16 @@ public class ProductService {
         existingProduct.setBrand(productUpdateRequest.getBrand());
         existingProduct.setPrice(productUpdateRequest.getPrice());
         existingProduct.setInventory(productUpdateRequest.getInventory());
-        Category category = categoryRepository.findByName(productUpdateRequest.getCategory().getName());
-        existingProduct.setCategory(category);
+        existingProduct.setDescription(productUpdateRequest.getDescription());
+        Category category = Optional.ofNullable(categoryRepository.findByName(productUpdateRequest.getCategory().getName()))
+                .orElseGet(() -> {
+                    Category newCategory = new Category(productUpdateRequest.getCategory().getName());
+                    return categoryRepository.save(newCategory);
+
+                });
+               existingProduct.setCategory(category);
         existingProduct.setName(productUpdateRequest.getName());
+        log.info("Product updated successfully!");
         return existingProduct;
 
     }

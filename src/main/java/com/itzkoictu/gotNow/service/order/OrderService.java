@@ -38,6 +38,7 @@ public class OrderService {
         order.setItems(new HashSet<>(orderItemList));
         order.setTotalAmount(calculateTotalAmount(orderItemList));
         Order savedOrder= orderRepository.save(order);
+        System.out.println("Order placed with id: "+ order.getId());
         cartService.clearCart(cart.getId());
         return savedOrder;
     }

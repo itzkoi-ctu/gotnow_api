@@ -20,5 +20,5 @@ public class OrderResponse {
     private LocalDate orderDate;
     private BigDecimal totalAmount;
     private String orderStatus;
-    private List<OrderItemResponse> items;
+    private Set<OrderItemResponse> items;
 }

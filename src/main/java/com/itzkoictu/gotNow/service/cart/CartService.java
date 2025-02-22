@@ -37,7 +37,7 @@ public class CartService {
     public void clearCart(Long cartId) {
         Cart cart = getCart(cartId);
 
-        cartRepository.deleteAllById(cartId);
+        cartItemRepository.deleteAllByCartId(cartId);
         cart.clearCart();
         cartRepository.deleteById(cartId);
     }

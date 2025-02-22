@@ -35,6 +35,6 @@ public class Order {
     private User user;
 
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     Set<OrderItem> items= new HashSet<>();
 }

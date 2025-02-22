@@ -17,8 +17,8 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("/user/order")
-    public ResponseEntity<ApiResponse> placeOrder(@RequestParam Long userId){
+    @PostMapping("/user/{userId}/place-order")
+    public ResponseEntity<ApiResponse> placeOrder(@PathVariable Long userId){
         Order order= orderService.placeOrder(userId);
         OrderResponse orderResponse= orderService.convertToOrderResponse(order);
         return ResponseEntity.accepted().body(new ApiResponse<>(HttpStatus.ACCEPTED.value(), "Order placed successfully!", orderResponse));

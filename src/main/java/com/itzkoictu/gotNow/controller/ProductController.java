@@ -51,18 +51,19 @@ public class ProductController {
 
     }
 
-    @DeleteMapping("/product/delete/{id}")
-    public ResponseEntity deleteProduct(@PathVariable Long id) {
+    @DeleteMapping("/product/{productId}/delete")
+    public ResponseEntity deleteProduct(@PathVariable Long productId) {
 
-        productService.deleteProductById(id);
-        return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Deleted successfully with productId " + id));
+        productService.deleteProductById(productId);
+        return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Product deleted successfully!" , productId));
 
     }
 
-    @PutMapping("/product/update/{productId}")
+    @PutMapping("/product/{productId}/update")
     public ResponseEntity updateProduct(@RequestBody ProductUpdateRequest productUpdateRequest, @PathVariable Long productId) {
         Product product = productService.updateProduct(productUpdateRequest, productId);
-        return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Updated successfully with productId " + productId, product));
+        ProductResponse response= productService.convertToProductResponse(product);
+        return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Product updated successfully! ", response));
 
     }
 

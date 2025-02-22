@@ -29,7 +29,7 @@ import java.util.List;
 public class ImageController {
     private final ImageService imageService;
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/upload")
     public ApiResponse<?> uploadImage(
                                     @RequestParam("files") List<MultipartFile> files,
                                     @RequestParam("productId") Long productId){
@@ -54,18 +54,18 @@ public class ImageController {
         }
     }
 
-    @PutMapping("/image/update/{imageId}")
-    public  ApiResponse<?> updateImage(
+    @PutMapping("/image/{imageId}/update")
+    public  ResponseEntity<?> updateImage(
             @RequestParam("file") MultipartFile image ,
             @PathVariable Long imageId){
         try {
             imageService.updateImage(image, imageId);
-            return new ApiResponse<>(HttpStatus.OK.value(), "image updated successfully");
+            return ResponseEntity.accepted().body(new ApiResponse<>(HttpStatus.ACCEPTED.value(), "Image updated successfully!"));
         } catch (EntityNotFoundException e) {
-            return new ResponseError(HttpStatus.CONFLICT.value(), "Error: "+ e.getMessage());
+            return ResponseEntity.internalServerError().body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Image updated fail!"));
         }
     }
-    @DeleteMapping("/image/delete/{imageId}")
+    @DeleteMapping("/image/{imageId}/delete")
     public  ApiResponse<?> deleteImage(@PathVariable Long imageId){
         try {
             imageService.deleteImageById( imageId);

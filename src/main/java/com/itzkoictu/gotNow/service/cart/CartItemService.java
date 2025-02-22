@@ -1,5 +1,6 @@
 package com.itzkoictu.gotNow.service.cart;
 
+import com.itzkoictu.gotNow.dto.response.CartItemResponse;
 import com.itzkoictu.gotNow.model.Cart;
 import com.itzkoictu.gotNow.model.CartItem;
 import com.itzkoictu.gotNow.model.Product;
@@ -8,6 +9,7 @@ import com.itzkoictu.gotNow.repository.CartRepository;
 import com.itzkoictu.gotNow.service.product.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,8 +22,9 @@ public class CartItemService {
     private final CartRepository cartRepository;
     private final CartService cartService;
     private final ProductService productService;
+    private final ModelMapper modelMapper;
 
-    public void addItemToCart(Long cartId, Long productId, int quantity) {
+    public CartItem addItemToCart(Long cartId, Long productId, int quantity) {
         Cart cart = cartService.getCart(cartId);
         Product product = productService.getProductById(productId);
         CartItem cartItem = cart.getItems()
@@ -40,7 +43,7 @@ public class CartItemService {
         cart.addItem(cartItem);
         cartItemRepository.save(cartItem);
         cartRepository.save(cart);
-
+        return cartItem;
     }
 
     public void removeItemFromCart(Long cartId, Long productId) {
@@ -72,5 +75,9 @@ public class CartItemService {
                 .stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new EntityNotFoundException("Cart not found"));
+    }
+
+    public CartItemResponse convertToResponse(CartItem cartItem){
+        return modelMapper.map(cartItem, CartItemResponse.class);
     }
 }
