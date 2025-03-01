@@ -13,7 +13,7 @@ FROM openjdk:21-jdk-slim
 
 # 5. Copy file JAR từ image builder vào image chạy
 WORKDIR /app
-COPY --from=builder /app/target/laundry_backend-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY --from=builder /app/target/gotNow-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # 6. Expose cổng ứng dụng
 EXPOSE 8080
