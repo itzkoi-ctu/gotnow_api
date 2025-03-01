@@ -1,6 +1,7 @@
 package com.itzkoictu.gotNow.service.order;
 
 
+import com.itzkoictu.gotNow.dto.request.PaymentRequest;
 import com.itzkoictu.gotNow.dto.response.OrderResponse;
 import com.itzkoictu.gotNow.enums.OrderStatus;
 import com.itzkoictu.gotNow.model.Cart;
@@ -10,6 +11,9 @@ import com.itzkoictu.gotNow.model.Product;
 import com.itzkoictu.gotNow.repository.OrderRepository;
 import com.itzkoictu.gotNow.repository.ProductRepository;
 import com.itzkoictu.gotNow.service.cart.CartService;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -80,5 +84,17 @@ public class OrderService {
 
     public OrderResponse convertToOrderResponse(Order order){
         return modelMapper.map(order, OrderResponse.class);
+    }
+
+    public String createPaymentIntent(PaymentRequest request) throws StripeException {
+        long amountInSmallestUnit = Math.round(request.getAmount() *100);
+
+        PaymentIntent intent= PaymentIntent.create(
+                PaymentIntentCreateParams.builder()
+                        .setAmount(amountInSmallestUnit)
+                        .setCurrency(request.getCurrency())
+                        .addPaymentMethodType("card")
+                        .build());
+        return intent.getClientSecret();
     }
 }
