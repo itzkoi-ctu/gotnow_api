@@ -26,8 +26,8 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
     public void onApplicationEvent(ApplicationReadyEvent event) {
         Set<String> defaultRole= Set.of("ROLE_USER", "ROLE_ADMIN", "ROLE_CUSTOMER");
         createDefaultRole(defaultRole);
-        //createDefaultAdminIfNotExits();
-        //createDefaultUserIfNotExists();
+        createDefaultAdminIfNotExits();
+        createDefaultUserIfNotExists();
     }
 
     private void createDefaultRole(Set<String> roles){

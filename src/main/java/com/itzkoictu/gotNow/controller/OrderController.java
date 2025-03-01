@@ -3,6 +3,7 @@ package com.itzkoictu.gotNow.controller;
 import com.itzkoictu.gotNow.dto.request.PaymentRequest;
 import com.itzkoictu.gotNow.dto.response.ApiResponse;
 import com.itzkoictu.gotNow.dto.response.OrderResponse;
+import com.itzkoictu.gotNow.enums.OrderStatus;
 import com.itzkoictu.gotNow.model.Order;
 import com.itzkoictu.gotNow.service.order.OrderService;
 import com.stripe.exception.StripeException;
@@ -41,6 +42,22 @@ public class OrderController {
     public ResponseEntity<?> createPaymentIntent(@RequestBody PaymentRequest request) throws StripeException {
         String clientSecret = orderService.createPaymentIntent(request);
         return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
+    }
+
+    @GetMapping("/all/order")
+    public ResponseEntity<ApiResponse> getAllOrders() {
+        List<OrderResponse> orderList = orderService.getAllOrders();
+        return ResponseEntity.ok().body(new ApiResponse<>(HttpStatus.OK.value(), "all orders", orderList));
+
+
+    }
+
+    @PutMapping("/update/{orderId}/order")
+    public ResponseEntity<ApiResponse> updateOrderStatus(@PathVariable Long orderId, @RequestParam OrderStatus orderStatus) {
+        Order order= orderService.changeOrderStatus(orderId,orderStatus);
+        OrderResponse orderResponse= orderService.convertToOrderResponse(order);
+        return ResponseEntity.ok().body(new ApiResponse<>(HttpStatus.OK.value(), "Order updated successfully", orderResponse));
+
     }
 
 }

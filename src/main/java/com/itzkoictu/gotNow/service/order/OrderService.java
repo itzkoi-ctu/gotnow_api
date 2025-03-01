@@ -14,6 +14,7 @@ import com.itzkoictu.gotNow.service.cart.CartService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -96,5 +97,23 @@ public class OrderService {
                         .addPaymentMethodType("card")
                         .build());
         return intent.getClientSecret();
+    }
+    public List<OrderResponse> convertToResponses(List<Order> orderList){
+        return orderList.stream().map(this::convertToOrderResponse).toList();
+    }
+
+    public List<OrderResponse> getAllOrders(){
+        List<Order> orderList= orderRepository.findAll();
+        List<OrderResponse> orderResponses= convertToResponses(orderList);
+        return orderResponses;
+    }
+
+    public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){
+        Order order= orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found!"));
+        order.setOrderStatus(orderStatus);
+        return orderRepository.save(order);
+
+
     }
 }
