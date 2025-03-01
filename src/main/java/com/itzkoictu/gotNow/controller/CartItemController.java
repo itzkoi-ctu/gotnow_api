@@ -23,11 +23,12 @@ public class CartItemController {
     private final CartService cartService;
 
     @PostMapping("/item/add")
-    public ResponseEntity<ApiResponse> addItemToCart(@RequestParam Long productId,
+    public ResponseEntity<ApiResponse> addItemToCart(
+                                                     @RequestParam Long productId,
                                                      @RequestParam int quantity) {
-        //User user= userService.getAuthenticatedUser();
-        //Cart cart= cartService.initializeNewCartForUser(user);
-        CartItem cartItem = cartItemService.addItemToCart(2L, productId, quantity);
+        User user= userService.getAuthenticatedUser();
+        Cart cart= cartService.initializeNewCartForUser(user);
+        CartItem cartItem = cartItemService.addItemToCart(cart.getId(), productId, quantity);
         CartItemResponse response = cartItemService.convertToResponse(cartItem);
         return ResponseEntity.accepted().body(new ApiResponse(HttpStatus.ACCEPTED.value(), "Item added successfully", response));
     }

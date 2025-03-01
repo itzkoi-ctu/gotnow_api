@@ -14,14 +14,14 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.prefix}")
+@RequestMapping("${api.prefix}/addresses")
 public class AddressController {
 
     private final AddressService addressService;
 
-    @PostMapping("/new")
-    public ResponseEntity<ApiResponse> createAddresses(@RequestBody List<Address> addresses) {
-        List<Address> addressList = addressService.createAddress(addresses);
+    @PostMapping("/{userId}/new")
+    public ResponseEntity<ApiResponse> createAddresses(@RequestBody List<Address> addresses, @PathVariable Long userId) {
+        List<Address> addressList = addressService.createAddress(addresses, userId);
         List<AddressResponse> addressDto = addressService.convertToResponse(addressList);
         return ResponseEntity.ok(new ApiResponse(HttpStatus.OK.value(),"Success!", addressDto));
     }

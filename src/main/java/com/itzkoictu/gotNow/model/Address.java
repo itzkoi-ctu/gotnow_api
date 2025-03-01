@@ -22,6 +22,7 @@ public class Address {
     String state;
     String city;
     String street;
+    String mobileNumber;
     @Enumerated(EnumType.STRING)
     AddressType addressType;
 

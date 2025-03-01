@@ -3,6 +3,8 @@ package com.itzkoictu.gotNow.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class UserResponse {
@@ -10,4 +12,7 @@ public class UserResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private List<OrderResponse> orders;
+    private CartResponse cart;
+    private List<AddressResponse> addressList;
 }

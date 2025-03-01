@@ -48,7 +48,7 @@ public class AuthController {
 
         Map<String, String> token= new HashMap<>();
 
-        token.put("accessToken: ", accessToken);
+        token.put("accessToken", accessToken);
         return ResponseEntity.accepted().body(token);
 
     }
@@ -66,7 +66,7 @@ public class AuthController {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
                 if(newAccessToken != null){
                     Map<String, String> token= new HashMap<>();
-                    token.put("accessToken: ", newAccessToken);
+                    token.put("accessToken", newAccessToken);
                     return ResponseEntity.ok(token);
                 }else {
                     return ResponseEntity

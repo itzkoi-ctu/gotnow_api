@@ -11,5 +11,7 @@ public class AddressResponse {
     private String state;
     private String city;
     private String street;
+    private String mobileNumber;
     private String addressType;
+
 }

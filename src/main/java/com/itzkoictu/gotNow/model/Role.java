@@ -22,4 +22,7 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users= new HashSet<>();
 
+    public Role(String s) {
+        name= s;
+    }
 }

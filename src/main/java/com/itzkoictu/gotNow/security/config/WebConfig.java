@@ -15,8 +15,22 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173") // Frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
 }
+//@Bean
+//public WebMvcConfigurer corsConfigurer() {
+//    return new WebMvcConfigurer() {
+//        @Override
+//        public void addCorsMappings(@NonNull CorsRegistry registry) {
+//            registry.addMapping("/**") // Apply to all endpoints
+//                    .allowedOrigins("http://localhost:5174") // Allow this origin
+//                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
+//                    .allowedHeaders("*") // Allow all headers
+//                    .allowCredentials(true); // Allow credentials
+//        }
+//    };
+//}

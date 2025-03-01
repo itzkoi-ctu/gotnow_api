@@ -4,8 +4,10 @@ package com.itzkoictu.gotNow.service.user;
 import com.itzkoictu.gotNow.dto.request.UserCreationRequest;
 import com.itzkoictu.gotNow.dto.request.UserUpdateRequest;
 import com.itzkoictu.gotNow.dto.response.UserResponse;
+import com.itzkoictu.gotNow.model.Role;
 import com.itzkoictu.gotNow.model.User;
 import com.itzkoictu.gotNow.repository.AddressRepository;
+import com.itzkoictu.gotNow.repository.RoleRepository;
 import com.itzkoictu.gotNow.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +28,11 @@ public class UserService {
     private final ModelMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final AddressRepository addressRepository;
-
+    private final RoleRepository roleRepository;
     public UserResponse createUser(UserCreationRequest request) {
+        Role userRole= Optional.ofNullable(roleRepository.findByName("ROLE_USER"))
+                .orElseThrow(() -> new EntityNotFoundException("Role not found!"));
+
         return Optional.of(request)
                 .filter(user -> !userRepository.existsByEmail(request.getEmail()))
                 .map(request1 -> {
@@ -35,6 +41,7 @@ public class UserService {
                             .lastName(request.getLastName())
                             .email(request.getEmail())
                             .password(passwordEncoder.encode(request.getPassword()))
+                            .roles(Set.of(userRole))
                             .build();
 
                     User savedUser = userRepository.save(user);

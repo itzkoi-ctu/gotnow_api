@@ -14,13 +14,13 @@ import java.util.List;
 @Data
 
 public class UserCreationRequest {
-    @NotBlank(message = "firstName must be not blank")
+//    @NotBlank(message = "firstName must be not blank")
     private String firstName;
-    @NotBlank(message = "lastName must be not blank")
+//    @NotBlank(message = "lastName must be not blank")
     private String lastName;
-    @Email(message = "email invalid format")
+//    @Email(message = "email invalid format")
     private String email;
-    @Size(min = 6, message = "password must be at least 6 characters")
+//    @Size(min = 6, message = "password must be at least 6 characters")
     private String password;
 
     private List<Address> addressList;

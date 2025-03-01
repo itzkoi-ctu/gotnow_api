@@ -2,9 +2,11 @@ package com.itzkoictu.gotNow.controller;
 
 import com.itzkoictu.gotNow.dto.request.UserCreationRequest;
 import com.itzkoictu.gotNow.dto.request.UserUpdateRequest;
+import com.itzkoictu.gotNow.dto.response.AddressResponse;
 import com.itzkoictu.gotNow.dto.response.ApiResponse;
 import com.itzkoictu.gotNow.dto.response.UserResponse;
 import com.itzkoictu.gotNow.model.User;
+import com.itzkoictu.gotNow.service.address.AddressService;
 import com.itzkoictu.gotNow.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -20,15 +24,17 @@ import org.springframework.web.bind.annotation.*;
 
 public class UserController {
     private final UserService userService;
-
-    @GetMapping("/user/{userId}")
+    private final AddressService addressService;
+    @GetMapping("/user/{userId}/user")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable Long userId){
         User user= userService.getUserById(userId);
         UserResponse userResponse= userService.convertToUserResponse(user);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "userId "+ userId, userResponse));
+        List<AddressResponse> addressResponse= addressService.convertToResponse(user.getAddresses());
+        userResponse.setAddressList(addressResponse);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success!", userResponse));
     }
 
-    @PostMapping("/user/add")
+    @PostMapping("/add")
     public ResponseEntity<ApiResponse> createUser( @Valid @RequestBody UserCreationRequest request){
         UserResponse userResponse= userService.createUser(request);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.ACCEPTED.value(), "created successfully!", userResponse));
