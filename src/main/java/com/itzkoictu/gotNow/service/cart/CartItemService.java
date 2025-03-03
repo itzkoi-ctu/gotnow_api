@@ -66,7 +66,8 @@ public class CartItemService {
                 );
         BigDecimal totalAmount = cart.getItems().stream().map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        cart.setTotalAmount(totalAmount);
+        cartRepository.save(cart);
     }
 
     public CartItem getCartItem(Long cartId, Long productId) {

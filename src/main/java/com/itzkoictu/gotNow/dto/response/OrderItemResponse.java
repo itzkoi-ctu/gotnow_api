@@ -1,11 +1,13 @@
 package com.itzkoictu.gotNow.dto.response;
 
+import com.itzkoictu.gotNow.model.Image;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,4 +18,6 @@ public class OrderItemResponse {
     private String productBrand;
     private int quantity;
     private BigDecimal price;
+    private List<ImageResponse> images;
+
 }

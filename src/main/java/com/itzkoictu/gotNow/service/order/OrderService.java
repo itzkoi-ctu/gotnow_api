@@ -1,15 +1,19 @@
 package com.itzkoictu.gotNow.service.order;
 
 
+import com.itzkoictu.gotNow.dto.request.PaymentRequest;
+import com.itzkoictu.gotNow.dto.response.ImageResponse;
+import com.itzkoictu.gotNow.dto.response.OrderItemResponse;
 import com.itzkoictu.gotNow.dto.response.OrderResponse;
 import com.itzkoictu.gotNow.enums.OrderStatus;
-import com.itzkoictu.gotNow.model.Cart;
-import com.itzkoictu.gotNow.model.Order;
-import com.itzkoictu.gotNow.model.OrderItem;
-import com.itzkoictu.gotNow.model.Product;
+import com.itzkoictu.gotNow.model.*;
 import com.itzkoictu.gotNow.repository.OrderRepository;
 import com.itzkoictu.gotNow.repository.ProductRepository;
 import com.itzkoictu.gotNow.service.cart.CartService;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -17,9 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +82,67 @@ public class OrderService {
     }
 
     public OrderResponse convertToOrderResponse(Order order){
-        return modelMapper.map(order, OrderResponse.class);
+        OrderResponse orderResponse= modelMapper.map(order, OrderResponse.class);
+        Set<OrderItemResponse> responses= order.getItems().stream().map(this::fromOrderItem).collect(Collectors.toSet());
+        orderResponse.setItems(responses);
+        return orderResponse;
+    }
+
+    public String createPaymentIntent(PaymentRequest request) throws StripeException {
+        long amountInSmallestUnit = Math.round(request.getAmount() *100);
+
+        PaymentIntent intent= PaymentIntent.create(
+                PaymentIntentCreateParams.builder()
+                        .setAmount(amountInSmallestUnit)
+                        .setCurrency(request.getCurrency())
+                        .addPaymentMethodType("card")
+                        .build());
+        return intent.getClientSecret();
+    }
+    public List<OrderResponse> convertToResponses(List<Order> orderList){
+        return orderList.stream().map(this::convertToOrderResponse).toList();
+    }
+
+    public List<OrderResponse> getAllOrders(){
+        List<Order> orderList= orderRepository.findAll();
+        List<OrderResponse> orderResponses= convertToResponses(orderList);
+        return orderResponses;
+    }
+
+    public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){
+        Order order= orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found!"));
+        order.setOrderStatus(orderStatus);
+        return orderRepository.save(order);
+
+
+    }
+
+    public OrderResponse getOrderById(Long orderId) {
+        Order order= orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found!"));
+        OrderResponse orderResponse = convertToOrderResponse(order);
+        return  orderResponse;
+    }
+
+
+    public OrderItemResponse fromOrderItem(OrderItem orderItem) {
+        OrderItemResponse response = new OrderItemResponse();
+        response.setProductId(orderItem.getProduct().getId());
+        response.setProductName(orderItem.getProduct().getName());
+        response.setProductBrand(orderItem.getProduct().getBrand());
+        response.setQuantity(orderItem.getQuantity());
+        response.setPrice(orderItem.getPrice());
+
+        // Lấy danh sách URL ảnh từ product
+        List<ImageResponse> imageResponses = orderItem.getProduct().getImages().stream()
+                .map(image -> new ImageResponse(image.getId(), image.getFileName(), image.getDownloadUrl())) // Giả sử Image có trường url
+                .toList();
+        response.setImages(imageResponses);
+
+        return response;
+    }
+
+    public List<OrderItemResponse> convertToOrderItemResponse(List<OrderItem> orderItems){
+        return orderItems.stream().map(this::fromOrderItem).toList();
     }
 }
