@@ -37,6 +37,15 @@ public class OrderController {
 
     }
 
+    @GetMapping("/order/{orderId}/detail")
+    private ResponseEntity<ApiResponse> getOrderById(@PathVariable Long orderId) {
+        OrderResponse order = orderService.getOrderById(orderId);
+        return ResponseEntity.ok().body(new ApiResponse<>(HttpStatus.OK.value(), "Order details" , order));
+
+
+    }
+
+
 
     @PostMapping("/create-payment-intent")
     public ResponseEntity<?> createPaymentIntent(@RequestBody PaymentRequest request) throws StripeException {

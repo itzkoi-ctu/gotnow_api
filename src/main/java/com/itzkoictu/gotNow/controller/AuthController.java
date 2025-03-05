@@ -5,6 +5,7 @@ import com.itzkoictu.gotNow.dto.response.ResponseError;
 import com.itzkoictu.gotNow.security.jwt.JwtUtils;
 import com.itzkoictu.gotNow.security.user.ShopUserDetailsService;
 import com.itzkoictu.gotNow.utils.CookieUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,17 +40,21 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
-        Authentication authentication= authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        String accessToken= jwtUtils.generateAccessTokenForUser(authentication);
-        String refreshToken= jwtUtils.generateRefreshToken(loginRequest.getEmail());
-        cookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpirationTime);
+        try{
+            Authentication authentication= authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            String accessToken= jwtUtils.generateAccessTokenForUser(authentication);
+            String refreshToken= jwtUtils.generateRefreshToken(loginRequest.getEmail());
+            cookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpirationTime);
 
 
-        Map<String, String> token= new HashMap<>();
+            Map<String, String> token= new HashMap<>();
 
-        token.put("accessToken", accessToken);
-        return ResponseEntity.accepted().body(token);
+            token.put("accessToken", accessToken);
+            return ResponseEntity.accepted().body(token);
+        } catch (Exception e) {
+            throw new EntityNotFoundException("Invalid email or password");
+        }
 
     }
 

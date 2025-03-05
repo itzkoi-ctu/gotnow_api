@@ -8,6 +8,7 @@ import com.itzkoictu.gotNow.repository.CartItemRepository;
 import com.itzkoictu.gotNow.repository.CartRepository;
 import com.itzkoictu.gotNow.service.product.ProductService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class CartItemService {
     private final ProductService productService;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public CartItem addItemToCart(Long cartId, Long productId, int quantity) {
         Cart cart = cartService.getCart(cartId);
         Product product = productService.getProductById(productId);
@@ -46,6 +48,7 @@ public class CartItemService {
         return cartItem;
     }
 
+    @Transactional
     public void removeItemFromCart(Long cartId, Long productId) {
         Cart cart = cartService.getCart(cartId);
         CartItem itemToRemove = getCartItem(cartId, productId);

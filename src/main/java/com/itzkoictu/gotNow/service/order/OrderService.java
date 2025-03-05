@@ -2,15 +2,15 @@ package com.itzkoictu.gotNow.service.order;
 
 
 import com.itzkoictu.gotNow.dto.request.PaymentRequest;
+import com.itzkoictu.gotNow.dto.response.ImageResponse;
+import com.itzkoictu.gotNow.dto.response.OrderItemResponse;
 import com.itzkoictu.gotNow.dto.response.OrderResponse;
 import com.itzkoictu.gotNow.enums.OrderStatus;
-import com.itzkoictu.gotNow.model.Cart;
-import com.itzkoictu.gotNow.model.Order;
-import com.itzkoictu.gotNow.model.OrderItem;
-import com.itzkoictu.gotNow.model.Product;
+import com.itzkoictu.gotNow.model.*;
 import com.itzkoictu.gotNow.repository.OrderRepository;
 import com.itzkoictu.gotNow.repository.ProductRepository;
 import com.itzkoictu.gotNow.service.cart.CartService;
+import com.itzkoictu.gotNow.service.user.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -22,17 +22,16 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -83,9 +82,31 @@ public class OrderService {
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
-    public OrderResponse convertToOrderResponse(Order order){
-        return modelMapper.map(order, OrderResponse.class);
-    }
+//    public OrderResponse convertToOrderResponse(Order order){
+//        OrderResponse orderResponse= modelMapper.map(order, OrderResponse.class);
+//        Set<OrderItemResponse> responses= convertToOrderItemResponse(order.getItems());
+//        orderResponse.setItems(responses);
+//        return orderResponse;
+//    }
+public OrderResponse convertToOrderResponse(Order order) {
+    OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+
+    // Kiểm tra nếu order.getItems() có OrderItem với product bị null
+    Set<OrderItemResponse> responses = order.getItems().stream()
+            .filter(orderItem -> {
+                if (orderItem.getProduct() == null) {
+                    System.out.println("⚠ Cảnh báo: OrderItem có Product = null!");
+                    return false; // Bỏ qua OrderItem bị null product
+                }
+                return true;
+            })
+            .map(this::fromOrderItem)
+            .collect(Collectors.toSet());
+
+    orderResponse.setItems(responses);
+    return orderResponse;
+}
+
 
     public String createPaymentIntent(PaymentRequest request) throws StripeException {
         long amountInSmallestUnit = Math.round(request.getAmount() *100);
@@ -98,13 +119,13 @@ public class OrderService {
                         .build());
         return intent.getClientSecret();
     }
-    public List<OrderResponse> convertToResponses(List<Order> orderList){
+    public List<OrderResponse> convertToOrderResponses(List<Order> orderList){
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
     public List<OrderResponse> getAllOrders(){
         List<Order> orderList= orderRepository.findAll();
-        List<OrderResponse> orderResponses= convertToResponses(orderList);
+        List<OrderResponse> orderResponses= convertToOrderResponses(orderList);
         return orderResponses;
     }
 
@@ -115,5 +136,35 @@ public class OrderService {
         return orderRepository.save(order);
 
 
+    }
+
+    public OrderResponse getOrderById(Long orderId) {
+        Order order= orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found!"));
+
+        OrderResponse orderResponse = convertToOrderResponse(order);
+        orderResponse.setUsername(order.getUser().getFirstName()+" "+ order.getUser().getLastName());
+        return  orderResponse;
+    }
+
+
+    public OrderItemResponse fromOrderItem(OrderItem orderItem) {
+        OrderItemResponse response = new OrderItemResponse();
+        response.setProductId(orderItem.getProduct().getId());
+        response.setProductName(orderItem.getProduct().getName());
+        response.setProductBrand(orderItem.getProduct().getBrand());
+        response.setQuantity(orderItem.getQuantity());
+        response.setPrice(orderItem.getPrice());
+
+        // Lấy danh sách URL ảnh từ product
+        List<ImageResponse> imageResponses = orderItem.getProduct().getImages().stream()
+                .map(image -> new ImageResponse(image.getId(), image.getFileName(), image.getDownloadUrl())) // Giả sử Image có trường url
+                .toList();
+        response.setImages(imageResponses);
+
+        return response;
+    }
+
+    public Set<OrderItemResponse> convertToOrderItemResponse(Set<OrderItem> orderItems){
+        return orderItems.stream().map(this::fromOrderItem).collect(Collectors.toSet());
     }
 }

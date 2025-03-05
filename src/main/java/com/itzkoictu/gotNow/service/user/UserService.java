@@ -91,4 +91,18 @@ public class UserService {
         return Optional.ofNullable(userRepository.findByEmail(email))
                 .orElseThrow(() -> new EntityNotFoundException("Login required"));
     }
+
+    public void updateUserAvatar(Long userId, String imageUrl) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setAvatarUrl(imageUrl);
+        userRepository.save(user);
+    }
+
+//    public UserMessageResponse toUserMessageResponse(User user){
+//        UserMessageResponse userMessageResponse= mapper.map(user, UserMessageResponse.class);
+//        return userMessageResponse;
+//    }
+
+
+
 }
