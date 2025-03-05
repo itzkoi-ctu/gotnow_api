@@ -60,6 +60,7 @@ public class RatingService {
                 .orElseThrow(()->new EntityNotFoundException("User not found"));
         RatingResponse response= modelMapper.map(rating, RatingResponse.class);
         response.setUserName(user.getFirstName()+ " " + user.getLastName());
+        response.setAvatarUrl(user.getAvatarUrl());
         return response;
     }
     public List<RatingResponse> convertToResponses(List<Rating> ratingList){

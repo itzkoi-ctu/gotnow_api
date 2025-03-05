@@ -19,5 +19,7 @@ public class RatingResponse {
     private double rating;
     private String comment;
     private String userName; // Thêm tên user
+    private String avatarUrl;
+
     private LocalDateTime createdAt;
 }

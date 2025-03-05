@@ -3,6 +3,8 @@ package com.itzkoictu.gotNow.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 
@@ -28,6 +30,8 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @OnDelete(action = OnDeleteAction.CASCADE) // ✅ Khi xóa Product, xóa luôn OrderItem liên quan
+
     private Product product;
 
     public OrderItem( Order order,Product product, BigDecimal price, int quantity) {

@@ -34,6 +34,8 @@ public class CartService {
         return cart;
     }
 
+
+    @Transactional
     public void clearCart(Long cartId) {
         Cart cart = getCart(cartId);
 

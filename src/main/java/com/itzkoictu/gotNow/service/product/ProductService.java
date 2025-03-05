@@ -106,8 +106,12 @@ public class ProductService {
                     List<CartItem> cartItems = cartItemRepository.findByProductId(productId);
                     cartItems.forEach(cartItem -> {
                         Cart cart = cartItem.getCart();
-                        cart.removeItem(cartItem);
+                        if(cart != null){
+                            cart.removeItem(cartItem);
+                        }
                         cartItemRepository.delete(cartItem);
+
+
                     });
 
                     List<OrderItem> orderItems = orderItemRepository.findProductById(productId);

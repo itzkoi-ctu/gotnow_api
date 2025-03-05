@@ -10,6 +10,7 @@ import com.itzkoictu.gotNow.model.*;
 import com.itzkoictu.gotNow.repository.OrderRepository;
 import com.itzkoictu.gotNow.repository.ProductRepository;
 import com.itzkoictu.gotNow.service.cart.CartService;
+import com.itzkoictu.gotNow.service.user.UserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -26,11 +27,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -81,12 +82,31 @@ public class OrderService {
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
-    public OrderResponse convertToOrderResponse(Order order){
-        OrderResponse orderResponse= modelMapper.map(order, OrderResponse.class);
-        Set<OrderItemResponse> responses= order.getItems().stream().map(this::fromOrderItem).collect(Collectors.toSet());
-        orderResponse.setItems(responses);
-        return orderResponse;
-    }
+//    public OrderResponse convertToOrderResponse(Order order){
+//        OrderResponse orderResponse= modelMapper.map(order, OrderResponse.class);
+//        Set<OrderItemResponse> responses= convertToOrderItemResponse(order.getItems());
+//        orderResponse.setItems(responses);
+//        return orderResponse;
+//    }
+public OrderResponse convertToOrderResponse(Order order) {
+    OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+
+    // Kiểm tra nếu order.getItems() có OrderItem với product bị null
+    Set<OrderItemResponse> responses = order.getItems().stream()
+            .filter(orderItem -> {
+                if (orderItem.getProduct() == null) {
+                    System.out.println("⚠ Cảnh báo: OrderItem có Product = null!");
+                    return false; // Bỏ qua OrderItem bị null product
+                }
+                return true;
+            })
+            .map(this::fromOrderItem)
+            .collect(Collectors.toSet());
+
+    orderResponse.setItems(responses);
+    return orderResponse;
+}
+
 
     public String createPaymentIntent(PaymentRequest request) throws StripeException {
         long amountInSmallestUnit = Math.round(request.getAmount() *100);
@@ -99,13 +119,13 @@ public class OrderService {
                         .build());
         return intent.getClientSecret();
     }
-    public List<OrderResponse> convertToResponses(List<Order> orderList){
+    public List<OrderResponse> convertToOrderResponses(List<Order> orderList){
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
     public List<OrderResponse> getAllOrders(){
         List<Order> orderList= orderRepository.findAll();
-        List<OrderResponse> orderResponses= convertToResponses(orderList);
+        List<OrderResponse> orderResponses= convertToOrderResponses(orderList);
         return orderResponses;
     }
 
@@ -120,7 +140,9 @@ public class OrderService {
 
     public OrderResponse getOrderById(Long orderId) {
         Order order= orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found!"));
+
         OrderResponse orderResponse = convertToOrderResponse(order);
+        orderResponse.setUsername(order.getUser().getFirstName()+" "+ order.getUser().getLastName());
         return  orderResponse;
     }
 
@@ -142,7 +164,7 @@ public class OrderService {
         return response;
     }
 
-    public List<OrderItemResponse> convertToOrderItemResponse(List<OrderItem> orderItems){
-        return orderItems.stream().map(this::fromOrderItem).toList();
+    public Set<OrderItemResponse> convertToOrderItemResponse(Set<OrderItem> orderItems){
+        return orderItems.stream().map(this::fromOrderItem).collect(Collectors.toSet());
     }
 }
