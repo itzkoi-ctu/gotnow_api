@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,9 +131,13 @@ public OrderResponse convertToOrderResponse(Order order) {
     }
 
     public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){
+
         Order order= orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found!"));
         order.setOrderStatus(orderStatus);
+        if(orderStatus==OrderStatus.DELIVERED){
+            order.setDeliveredDay(LocalDateTime.now());
+        }
         return orderRepository.save(order);
 
 

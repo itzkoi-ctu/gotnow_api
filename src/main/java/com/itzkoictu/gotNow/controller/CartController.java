@@ -5,7 +5,6 @@ import com.itzkoictu.gotNow.dto.response.CartResponse;
 import com.itzkoictu.gotNow.model.Cart;
 import com.itzkoictu.gotNow.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
