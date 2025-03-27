@@ -81,6 +81,7 @@ public class OrderService {
     }
     public List<OrderResponse> getUserOrders(Long userId ){
         List<Order> orderList= orderRepository.findByUserId(userId);
+        System.out.println("Order List: " + orderList);
 
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
@@ -88,10 +89,8 @@ public class OrderService {
 
 public OrderResponse convertToOrderResponse(Order order) {
     OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
-    Address address= addressService.getUserAddresses(order.getUser().getId())
-            .getFirst();
-    AddressResponse addressResponse= addressService.convertToAddressResponse(address);
-    // Kiểm tra nếu order.getItems() có OrderItem với product bị null
+
+
     Set<OrderItemResponse> responses = order.getItems().stream()
             .filter(orderItem -> {
                 if (orderItem.getProduct() == null) {
@@ -103,8 +102,8 @@ public OrderResponse convertToOrderResponse(Order order) {
             .map(this::fromOrderItem)
             .collect(Collectors.toSet());
     orderResponse.setItems(responses);
-    orderResponse.setAddressResponse(addressResponse);
     orderResponse.setUsername(order.getUser().getFirstName()+" "+ order.getUser().getLastName());
+
     return orderResponse;
 }
 
@@ -121,14 +120,31 @@ public OrderResponse convertToOrderResponse(Order order) {
         return intent.getClientSecret();
     }
     public List<OrderResponse> convertToOrderResponses(List<Order> orderList){
+
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
-    public List<OrderResponse> getAllOrders(){
-        List<Order> orderList= orderRepository.findAll();
-        List<OrderResponse> orderResponses= convertToOrderResponses(orderList);
-        return orderResponses;
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orderList = orderRepository.findAll();
+        System.out.println("Order list size: " + orderList.size());
+
+        if (orderList.isEmpty()) {
+            System.out.println("⚠ Không có đơn hàng nào trong database!");
+            return Collections.emptyList(); // Trả về danh sách rỗng, tránh lỗi null
+        }
+
+        try {
+            List<OrderResponse> orderResponses = convertToOrderResponses(orderList);
+            System.out.println("✅ Converted OrderResponses: " + orderResponses);
+            return orderResponses;
+        } catch (Exception e) {
+            System.out.println("❌ Lỗi khi chuyển đổi danh sách OrderResponses:");
+            e.printStackTrace(); // In lỗi ra console
+            return Collections.emptyList();
+        }
     }
+
+
 
     public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){
 
