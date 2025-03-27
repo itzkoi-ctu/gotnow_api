@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 @Getter
 @Setter
@@ -16,5 +17,7 @@ public class OrderResponse {
     private LocalDate orderDate;
     private BigDecimal totalAmount;
     private String orderStatus;
+    private LocalDateTime deliveredDay;
     private Set<OrderItemResponse> items;
+    private AddressResponse addressResponse;
 }

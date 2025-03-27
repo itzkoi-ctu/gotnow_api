@@ -2,6 +2,7 @@ package com.itzkoictu.gotNow.security.jwt;
 
 
 import com.itzkoictu.gotNow.security.user.ShopUserDetails;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -80,4 +81,25 @@ public class JwtUtils {
             throw new JwtException(e.getMessage());
         }
     }
+
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("id", Long.class); // Lấy userId từ token
+    }
+
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("roles", List.class); // Lấy danh sách roles từ token
+    }
+
+
 }

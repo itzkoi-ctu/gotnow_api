@@ -2,6 +2,7 @@ package com.itzkoictu.gotNow.service.order;
 
 
 import com.itzkoictu.gotNow.dto.request.PaymentRequest;
+import com.itzkoictu.gotNow.dto.response.AddressResponse;
 import com.itzkoictu.gotNow.dto.response.ImageResponse;
 import com.itzkoictu.gotNow.dto.response.OrderItemResponse;
 import com.itzkoictu.gotNow.dto.response.OrderResponse;
@@ -9,6 +10,7 @@ import com.itzkoictu.gotNow.enums.OrderStatus;
 import com.itzkoictu.gotNow.model.*;
 import com.itzkoictu.gotNow.repository.OrderRepository;
 import com.itzkoictu.gotNow.repository.ProductRepository;
+import com.itzkoictu.gotNow.service.address.AddressService;
 import com.itzkoictu.gotNow.service.cart.CartService;
 import com.itzkoictu.gotNow.service.user.UserService;
 import com.stripe.exception.StripeException;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,8 +34,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
-    private final UserService userService;
     private final ModelMapper modelMapper;
+    private final AddressService addressService;
 
     @Transactional
     public Order placeOrder(Long userId){
@@ -82,15 +85,12 @@ public class OrderService {
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
-//    public OrderResponse convertToOrderResponse(Order order){
-//        OrderResponse orderResponse= modelMapper.map(order, OrderResponse.class);
-//        Set<OrderItemResponse> responses= convertToOrderItemResponse(order.getItems());
-//        orderResponse.setItems(responses);
-//        return orderResponse;
-//    }
+
 public OrderResponse convertToOrderResponse(Order order) {
     OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
-
+    Address address= addressService.getUserAddresses(order.getUser().getId())
+            .getFirst();
+    AddressResponse addressResponse= addressService.convertToAddressResponse(address);
     // Kiểm tra nếu order.getItems() có OrderItem với product bị null
     Set<OrderItemResponse> responses = order.getItems().stream()
             .filter(orderItem -> {
@@ -102,8 +102,9 @@ public OrderResponse convertToOrderResponse(Order order) {
             })
             .map(this::fromOrderItem)
             .collect(Collectors.toSet());
-
     orderResponse.setItems(responses);
+    orderResponse.setAddressResponse(addressResponse);
+    orderResponse.setUsername(order.getUser().getFirstName()+" "+ order.getUser().getLastName());
     return orderResponse;
 }
 
@@ -130,9 +131,13 @@ public OrderResponse convertToOrderResponse(Order order) {
     }
 
     public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){
+
         Order order= orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found!"));
         order.setOrderStatus(orderStatus);
+        if(orderStatus==OrderStatus.DELIVERED){
+            order.setDeliveredDay(LocalDateTime.now());
+        }
         return orderRepository.save(order);
 
 
