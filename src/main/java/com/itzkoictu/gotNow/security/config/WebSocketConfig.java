@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry){
         registry
                 .addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:5173") // Cho phép frontend kết nối
+                .setAllowedOrigins("https://gotnow-ui-yncs.vercel.app/") // Cho phép frontend kết nối
                 .addInterceptors(new WebSocketAuthInterceptor())
                 .withSockJS();
     }
