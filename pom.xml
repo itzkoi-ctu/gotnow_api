@@ -11,7 +11,7 @@
 	<groupId>com.gotNow</groupId>
 	<artifactId>gotNow</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>helloWorld</name>
+	<name>gotNow.com</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -131,6 +131,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.3</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

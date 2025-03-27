@@ -19,4 +19,5 @@ public class OrderResponse {
     private String orderStatus;
     private LocalDateTime deliveredDay;
     private Set<OrderItemResponse> items;
+    private AddressResponse addressResponse;
 }

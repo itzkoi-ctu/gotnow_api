@@ -1,8 +1,10 @@
 package com.itzkoictu.gotNow.controller;
 
 import com.itzkoictu.gotNow.dto.response.ApiResponse;
+import com.itzkoictu.gotNow.dto.response.ConversationResponse;
 import com.itzkoictu.gotNow.model.Conversation;
 import com.itzkoictu.gotNow.repository.ConversationRepository;
+import com.itzkoictu.gotNow.service.chat.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +20,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatHistoryController {
     private final ConversationRepository conversationRepository;
-
+    private final ChatService chatService;
 
 
     // ✅ API lấy danh sách User đã chat với Admin
     @GetMapping("/history")
     public ResponseEntity<ApiResponse> getChatHistory() {
-        List<Conversation> conversations= conversationRepository.findAll();
-        return  ResponseEntity.ok().body(new ApiResponse(HttpStatus.OK.value(), "All chats", conversations));
+        List<ConversationResponse> conversationResponses= chatService.getChatHistory();
+        return  ResponseEntity.ok().body(new ApiResponse(HttpStatus.OK.value(), "All chats", conversationResponses));
     }
     @GetMapping("/get-chat")
     public ResponseEntity<ApiResponse> getUserChat(@RequestParam Long adminId, @RequestParam Long userId){
