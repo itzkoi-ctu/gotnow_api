@@ -42,7 +42,7 @@ public class UserController {
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> createUser( @Valid @RequestBody UserCreationRequest request){
         UserResponse userResponse= userService.createUser(request);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.ACCEPTED.value(), "created successfully!", userResponse));
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.ACCEPTED.value(), "Account is created successfully!", userResponse));
     }
     @PutMapping("/user/update/{userId}")
     public ResponseEntity<ApiResponse> updateUser(@RequestBody UserUpdateRequest request, @PathVariable Long userId){

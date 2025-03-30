@@ -14,10 +14,10 @@ import java.util.Set;
 public class OrderResponse {
     private Long id;
     private String username;
+    private String email;
     private LocalDate orderDate;
     private BigDecimal totalAmount;
     private String orderStatus;
     private LocalDateTime deliveredDay;
     private Set<OrderItemResponse> items;
-    private AddressResponse addressResponse;
 }

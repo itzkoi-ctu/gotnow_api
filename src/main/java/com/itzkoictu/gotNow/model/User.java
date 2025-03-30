@@ -2,6 +2,7 @@ package com.itzkoictu.gotNow.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.itzkoictu.gotNow.enums.AuthProvider;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -25,6 +26,7 @@ public class User {
     private String firstName;
     private String lastName;
 
+    @Column(unique = true, nullable = false)
     private String email;
     private String password;
 
@@ -45,5 +47,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
 
 }

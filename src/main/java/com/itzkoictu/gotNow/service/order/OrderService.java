@@ -88,9 +88,7 @@ public class OrderService {
 
 public OrderResponse convertToOrderResponse(Order order) {
     OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
-    Address address= addressService.getUserAddresses(order.getUser().getId())
-            .getFirst();
-    AddressResponse addressResponse= addressService.convertToAddressResponse(address);
+
     // Kiểm tra nếu order.getItems() có OrderItem với product bị null
     Set<OrderItemResponse> responses = order.getItems().stream()
             .filter(orderItem -> {
@@ -103,8 +101,8 @@ public OrderResponse convertToOrderResponse(Order order) {
             .map(this::fromOrderItem)
             .collect(Collectors.toSet());
     orderResponse.setItems(responses);
-    orderResponse.setAddressResponse(addressResponse);
     orderResponse.setUsername(order.getUser().getFirstName()+" "+ order.getUser().getLastName());
+    orderResponse.setEmail(order.getUser().getEmail());
     return orderResponse;
 }
 
@@ -124,10 +122,24 @@ public OrderResponse convertToOrderResponse(Order order) {
         return orderList.stream().map(this::convertToOrderResponse).toList();
     }
 
-    public List<OrderResponse> getAllOrders(){
-        List<Order> orderList= orderRepository.findAll();
-        List<OrderResponse> orderResponses= convertToOrderResponses(orderList);
-        return orderResponses;
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orderList = orderRepository.findAll();
+        System.out.println("Order list size: " + orderList.size());
+
+        if (orderList.isEmpty()) {
+            System.out.println("⚠ Không có đơn hàng nào trong database!");
+            return Collections.emptyList(); // Trả về danh sách rỗng, tránh lỗi null
+        }
+
+        try {
+            List<OrderResponse> orderResponses = convertToOrderResponses(orderList);
+            System.out.println("✅ Converted OrderResponses: " + orderResponses);
+            return orderResponses;
+        } catch (Exception e) {
+            System.out.println("❌ Lỗi khi chuyển đổi danh sách OrderResponses:");
+            e.printStackTrace(); // In lỗi ra console
+            return Collections.emptyList();
+        }
     }
 
     public Order changeOrderStatus(Long orderId, OrderStatus orderStatus){

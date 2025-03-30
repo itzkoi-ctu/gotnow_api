@@ -27,6 +27,7 @@ public class CartItemService {
 
     @Transactional
     public CartItem addItemToCart(Long cartId, Long productId, int quantity) {
+        System.out.println("Add item to cartId: "+ cartId);
         Cart cart = cartService.getCart(cartId);
         Product product = productService.getProductById(productId);
         CartItem cartItem = cart.getItems()

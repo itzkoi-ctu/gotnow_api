@@ -89,7 +89,7 @@ public class OrderController {
 
         // Tạo hàng tiêu đề
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"ID", "Username", "Order Day","Delivered Day", "Total Amount", "Order Status", "City", "Street"};
+        String[] headers = {"ID", "Username","Email", "Order Day","Delivered Day", "Total Amount", "Order Status"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -107,15 +107,14 @@ public class OrderController {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue((Integer) order.get("id"));
             row.createCell(1).setCellValue((String) order.get("username"));
-            row.createCell(2).setCellValue((String) order.get("orderDate"));
-            row.createCell(3).setCellValue((String) order.get("deliveredDay"));
+            row.createCell(2).setCellValue((String) order.get("email"));
+            row.createCell(3).setCellValue((String) order.get("orderDate"));
+            row.createCell(4).setCellValue((String) order.get("deliveredDay"));
 
-            row.createCell(4).setCellValue((Double) order.get("totalAmount"));
-            row.createCell(5).setCellValue((String) order.get("orderStatus"));
+            row.createCell(5).setCellValue((Double) order.get("totalAmount"));
+            row.createCell(6).setCellValue((String) order.get("orderStatus"));
 
-            Map<String, Object> address = (Map<String, Object>) order.get("addressResponse");
-            row.createCell(6).setCellValue((String) address.get("city"));
-            row.createCell(7).setCellValue((String) address.get("street"));
+
         }
 
         // Tạo file tạm và ghi dữ liệu vào

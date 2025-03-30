@@ -55,6 +55,7 @@ public class ChatService {
                 .admin("gotNow.com")
                 .avatarUser(user.getAvatarUrl())
                 .username(user.getFirstName()+ " "+ user.getLastName())
+                .email(user.getEmail())
                 .adminId(conversation.getAdminId())
                 .userId(conversation.getUserId())
                 .lastMessage(getLastMessage(conversation.getId()))

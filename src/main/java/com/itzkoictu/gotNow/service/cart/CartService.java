@@ -47,6 +47,7 @@ public class CartService {
     public Cart initializeNewCartForUser(User user) {
         return Optional.ofNullable(getCartByUserId(user.getId()))
                 .orElseGet(() -> {
+                    System.out.println("userId is added cartItem: "+ user.getId());
             Cart cart = new Cart();
             cart.setUser(user);
             return cartRepository.save(cart);

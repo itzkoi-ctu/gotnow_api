@@ -15,6 +15,7 @@ public class ConversationResponse {
     private Long userId;
     private String admin;
     private String username;
+    private String email;
     private String avatarUser;
     private Message lastMessage;
 

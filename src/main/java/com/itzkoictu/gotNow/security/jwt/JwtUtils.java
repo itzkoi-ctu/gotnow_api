@@ -1,6 +1,7 @@
 package com.itzkoictu.gotNow.security.jwt;
 
 
+import com.itzkoictu.gotNow.security.oauth2.UserPrincipal;
 import com.itzkoictu.gotNow.security.user.ShopUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -28,21 +29,55 @@ public class JwtUtils {
     @Value("${auth.token.refreshExpirationInMils}")
     private String refreshExpirationTime;
 
-    public String generateAccessTokenForUser(Authentication authentication) {
-        ShopUserDetails userPrincipal = (ShopUserDetails) authentication.getPrincipal();
+//    public String generateAccessTokenForUser(Authentication authentication) {
+//        ShopUserDetails userPrincipal = (ShopUserDetails) authentication.getPrincipal();
+//
+//        List<String> roles = userPrincipal.getAuthorities()
+//                .stream()
+//                .map(GrantedAuthority::getAuthority).toList();
+//
+//        return Jwts.builder()
+//                .setSubject(userPrincipal.getEmail())
+//                .claim("id", userPrincipal.getId())
+//                .claim("roles", roles)
+//                .setIssuedAt(new Date())
+//                .setExpiration(calculateExpirationDate(expirationTime))
+//                .signWith(key(), SignatureAlgorithm.HS256).compact();
+//    }
+public String generateAccessTokenForUser(Authentication authentication) {
+    Object principal = authentication.getPrincipal();
 
-        List<String> roles = userPrincipal.getAuthorities()
+    Long userId;
+    String email;
+    List<String> roles;
+
+    if (principal instanceof UserPrincipal userPrincipal) {
+        userId = userPrincipal.getId();
+        email = userPrincipal.getEmail();
+        roles = userPrincipal.getAuthorities()
                 .stream()
-                .map(GrantedAuthority::getAuthority).toList();
-
-        return Jwts.builder()
-                .setSubject(userPrincipal.getEmail())
-                .claim("id", userPrincipal.getId())
-                .claim("roles", roles)
-                .setIssuedAt(new Date())
-                .setExpiration(calculateExpirationDate(expirationTime))
-                .signWith(key(), SignatureAlgorithm.HS256).compact();
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+    } else if (principal instanceof ShopUserDetails shopUserDetails) {
+        userId = Long.valueOf(shopUserDetails.getId()); // Chuyển kiểu nếu cần
+        email = shopUserDetails.getUsername();
+        roles = shopUserDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+    } else {
+        throw new RuntimeException("Unsupported Principal Type: " + principal.getClass().getName());
     }
+
+    return Jwts.builder()
+            .setSubject(email)
+            .claim("id", userId)
+            .claim("roles", roles)
+            .setIssuedAt(new Date())
+            .setExpiration(calculateExpirationDate(expirationTime))
+            .signWith(key(), SignatureAlgorithm.HS256)
+            .compact();
+}
 
 
     public String generateRefreshToken(String email) {
